@@ -27,6 +27,7 @@ class SourceImage:
 	def __init__(self, path=None, metadata=None, image=None):
 		self.path = path
 		self.metadata = metadata
+		self.image = image
 
 class Person:
 	"""

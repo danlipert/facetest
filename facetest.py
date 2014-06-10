@@ -1,7 +1,8 @@
 import os, sys, json
 
 from classes import Person, Metadata, SourceImage
-from image import load_images, rotate_images, crop_images, normalize_images
+from image import load_images, rotate_images, crop_images, normalize_images, write_images
+from predict import create_predictive_model, test_model
 
 def show_usage():
 	print 'Please enter the path of the directory containing the source images and metadata'
@@ -36,32 +37,38 @@ def load_people(directory_path):
 				file_dictionaries[eachdirectory] = []
 			file_dictionaries[eachdirectory].append(eachfile)
 	
-	print 'Found %s labels and %s files' % (len(file_dictionaries.keys()), len(file_dictionaries.values()))
+	values_count = 0
+	#compile value list
+	for key, value in file_dictionaries.iteritems():
+		values = file_dictionaries[key]
+		values_count += len(values)
+			
+	print 'Found %s labels and %s files' % (len(file_dictionaries.keys()), values_count)
 	
 	for key, value in file_dictionaries.iteritems():
 		person = Person(label = key)
 		files_for_person = file_dictionaries[key]
 		#find matching .meta and .jpg
 		for eachfile in files_for_person:
-			if eachfile[-4:] == 'meta':
-				continue
-			file_prefix = eachfile.split('.')[0]
-			for eachotherfile in files_for_person:
-				if file_prefix == eachotherfile.split('.')[0] and eachotherfile.split('.')[1] != 'jpg':
-					#match found
-					metadatafile = eachotherfile
-					eyes_data = json.load(open(eachotherfile))
-					eyes={}
-					eyes['left'] = {}
-					eyes['right'] = {}
-					eyes['left']['x'] = eyes_data['left_eye_x']
-					eyes['left']['y'] = eyes_data['left_eye_y']
-					eyes['right']['x'] = eyes_data['right_eye_x']
-					eyes['right']['y'] = eyes_data['right_eye_y']
-					metadata = Metadata(eyes=eyes, person=Person)
-					source_image = SourceImage(metadata=metadata, path=os.path.join(key, value))
-					training_set.append(source_image)
-		
+			if eachfile[-3:] == 'jpg' or eachfile[-4:] == 'jpeg':
+				file_prefix = eachfile.split('.')[0]
+				for eachotherfile in files_for_person:
+					if file_prefix == eachotherfile.split('.')[0] and eachotherfile.split('.')[1] == 'meta':
+						#match found
+						metadatafile = os.path.join(key, eachotherfile)
+						eyes_data = json.load(open(metadatafile))
+						eyes={}
+						eyes['left'] = {}
+						eyes['right'] = {}
+						eyes['left']['x'] = eyes_data['left_eye_x']
+						eyes['left']['y'] = eyes_data['left_eye_y']
+						eyes['right']['x'] = eyes_data['right_eye_x']
+						eyes['right']['y'] = eyes_data['right_eye_y']
+						metadata = Metadata(eyes=eyes, person=person)
+						source_image = SourceImage(metadata=metadata, path=os.path.join(key, eachfile))
+						training_set.append(source_image)
+					
+	print 'training set compiled... %s entries' % len(training_set)
 	return training_set
 
 try:
@@ -72,24 +79,16 @@ except Exception as e:
 	
 training_set = load_people(directory_path)
 
-#test images quickly
-for source_image in training_set:
-	print source_image.path
-	print source_image.image
-
 load_images(training_set)
 
-#test images quickly
-for source_image in training_set:
-	print source_image.path
-	print source_image.image
-	
-#rotate_images(people)
-#normalize_images(people)
-#crop_images(people)
+rotate_images(training_set)
 
-#model = create_predictive_model(people)
+normalize_images(training_set)
+crop_images(training_set)
+write_images(training_set)
 
-#results = test_model(model)
+model = create_predictive_model(training_set)
+
+test_model(training_set, model)
 
 #render_output(results)
