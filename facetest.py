@@ -15,9 +15,25 @@ def show_usage():
 	print '        ->batman.meta'
 	print '        ->batman2.jpg'
 	print '        ->batman2.meta'
+	print ''
+	print 'Please enter the test type as the 2nd argument'
+	print 'Supported test types: PCA LDA'
 	print 'Usage:'
-	print 'python facetest.py ./faceimages/'
+	print 'python facetest.py ./faceimages/ PCA'
+
+def parse_test_type(arg):
+	"""
+	Option to allow different test types
+	Currently supported: PCA LDA
+	"""
+	if arg != 'PCA' and arg != 'LDA':
+		show_usage()
+		raise Exception('ERROR: Could not parse test type "%s"' % arg)
+		exit()
+	else:
+		return arg
 	
+
 def load_people(directory_path):
 	"""
 	Loads images and metadata from a directory into Person, SourceImage, and Metadata objects
@@ -71,24 +87,49 @@ def load_people(directory_path):
 	print 'training set compiled... %s entries' % len(training_set)
 	return training_set
 
+def run_pca():
+	
+	training_set = load_people(directory_path)
+
+	load_images(training_set)
+
+	rotate_images(training_set)
+
+	normalize_images(training_set)
+	crop_images(training_set)
+	write_images(training_set)
+
+	model = create_predictive_model(training_set, model_type='PCA')
+
+	test_model(training_set, model)
+
+def run_lda():
+	training_set = load_people(directory_path)
+
+	load_images(training_set)
+
+	rotate_images(training_set)
+
+	normalize_images(training_set)
+	crop_images(training_set)
+	write_images(training_set)
+
+	model = create_predictive_model(training_set, model_type='LDA')
+
+	test_model(training_set, model)
+	
 try:
 	directory_path = sys.argv[1]
 except Exception as e:
 	show_usage()
 	exit()
+
+test_type = parse_test_type(sys.argv[2])
+
+if test_type == 'PCA':
+	run_pca()
+elif test_type == 'LDA':
+	run_lda()
 	
-training_set = load_people(directory_path)
 
-load_images(training_set)
 
-rotate_images(training_set)
-
-normalize_images(training_set)
-crop_images(training_set)
-write_images(training_set)
-
-model = create_predictive_model(training_set)
-
-test_model(training_set, model)
-
-#render_output(results)

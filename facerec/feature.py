@@ -108,28 +108,37 @@ class LDA(AbstractFeature):
         self._num_components = num_components
 
     def compute(self, X, y):
-        # build the column matrix
+        print 'build the column matrix'
         XC = asColumnMatrix(X)
         y = np.asarray(y)
-        # calculate dimensions
+        for item in y:
+        	print item
+        print "calculate dimensions"
         d = XC.shape[0]
-        c = len(np.unique(y))        
-        # set a valid number of components
+        c = len(np.unique(y))
+        yset = set(y)
+        print '%s labels found' % c
+        print "set a valid number of components"
         if self._num_components <= 0:
             self._num_components = c-1
         elif self._num_components > (c-1):
             self._num_components = c-1
-        # calculate total mean
+        print "calculate total mean"
         meanTotal = XC.mean(axis=1).reshape(-1,1)
-        # calculate the within and between scatter matrices
+        print "calculate the within and between scatter matrices"
         Sw = np.zeros((d, d), dtype=np.float32)
         Sb = np.zeros((d, d), dtype=np.float32)
+        ysetlist = list(yset)
         for i in range(0,c):
-            Xi = XC[:,np.where(y==i)[0]]
+            label = ysetlist[i]
+            print 'analyzing label %s' % label
+            #grab entries from X for a given label
+            Xi = XC[:,np.where(y==label)[0]]
+            print 'Xi is length %s' % len(Xi)
             meanClass = np.mean(Xi, axis = 1).reshape(-1,1)
             Sw = Sw + np.dot((Xi-meanClass), (Xi-meanClass).T)
             Sb = Sb + Xi.shape[1] * np.dot((meanClass - meanTotal), (meanClass - meanTotal).T)
-        # solve eigenvalue problem for a general matrix
+        print "solve eigenvalue problem for a general matrix"
         self._eigenvalues, self._eigenvectors = np.linalg.eig(np.linalg.inv(Sw)*Sb)
         # sort eigenvectors by their eigenvalue in descending order
         idx = np.argsort(-self._eigenvalues.real)
