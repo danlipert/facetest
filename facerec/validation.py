@@ -93,6 +93,9 @@ class ValidationResult(object):
         res_accuracy = accuracy(self.true_positives, self.true_negatives, self.false_positives, self.false_negatives) * 100
         return "ValidationResult (Description=%s, Precision=%.2f%%, Accuracy=%.2f%%)" % (self.description, res_precision, res_accuracy)
     
+    def precision(self):
+        return precision(self.true_positives, self.false_positives) * 100
+    
 class ValidationStrategy(object):
     """ Represents a generic Validation kernel for all Validation strategies.
     """
