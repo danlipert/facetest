@@ -26,7 +26,7 @@ def parse_test_type(arg):
 	Option to allow different test types
 	Currently supported: PCA LDA
 	"""
-	if arg != 'PCA' and arg != 'LDA':
+	if arg != 'PCA' and arg != 'LDA' and arg != 'LBH':
 		show_usage()
 		raise Exception('ERROR: Could not parse test type "%s"' % arg)
 		exit()
@@ -66,7 +66,7 @@ def load_people(directory_path):
 		files_for_person = file_dictionaries[key]
 		#find matching .meta and .jpg
 		for eachfile in files_for_person:
-			if eachfile[-3:] == 'jpg' or eachfile[-4:] == 'jpeg':
+			if eachfile[-3:] == 'jpg' or eachfile[-4:] == 'jpeg' or eachfile[-3:] == 'JPG':
 				file_prefix = eachfile.split('.')[0]
 				for eachotherfile in files_for_person:
 					if file_prefix == eachotherfile.split('.')[0] and eachotherfile.split('.')[1] == 'meta':
@@ -118,6 +118,21 @@ def run_lda():
 
 	test_model(training_set, model)
 	
+def run_lbh():
+	training_set = load_people(directory_path)
+
+	load_images(training_set)
+
+	rotate_images(training_set)
+
+	normalize_images(training_set)
+	crop_images(training_set)
+	write_images(training_set)
+
+	model = create_predictive_model(training_set, model_type='LBH')
+
+	test_model(training_set, model)
+	
 try:
 	directory_path = sys.argv[1]
 except Exception as e:
@@ -130,6 +145,8 @@ if test_type == 'PCA':
 	run_pca()
 elif test_type == 'LDA':
 	run_lda()
+elif test_type == 'LBH':
+    run_lbh()
 	
 
 

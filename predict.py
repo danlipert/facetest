@@ -22,32 +22,37 @@ def load_images_and_labels(training_set):
 	
 
 def create_predictive_model(training_set, model_type='PCA'):
-	"""
-	Create a predictive model for facial recognition
-	training_set -- the images and data that will be used to create the model
-	
-	Returns a predictive model object
-	"""
-	if model_type == 'PCA':
-		feature = PCA()
-		classifier = NearestNeighbor(dist_metric=EuclideanDistance(), k=1)
-		# Define the model as the combination
-		model = PredictableModel(feature=feature, classifier=classifier)
-		X, y = load_images_and_labels(training_set)
-	elif model_type == 'LDA':
-		feature = Fisherfaces()
-		classifier = NearestNeighbor(dist_metric=EuclideanDistance(), k=1)
-		model = PredictableModel(feature=feature, classifier=classifier)
-		X, y = load_images_and_labels(training_set)		
-	else:
-		e = Exception("Unsupported model type")
-		raise e
-		exit()
-	
-	print 'begin model computation'
-	model.compute(X, y)
-	print 'model computation complete'
-	return model
+    """
+    Create a predictive model for facial recognition
+    training_set -- the images and data that will be used to create the model
+    
+    Returns a predictive model object
+    """
+    if model_type == 'PCA':
+        feature = PCA()
+        classifier = NearestNeighbor(dist_metric=EuclideanDistance(), k=1)
+        # Define the model as the combination
+        model = PredictableModel(feature=feature, classifier=classifier)
+        X, y = load_images_and_labels(training_set)
+    elif model_type == 'LDA':
+        feature = Fisherfaces()
+        classifier = NearestNeighbor(dist_metric=EuclideanDistance(), k=1)
+        model = PredictableModel(feature=feature, classifier=classifier)
+        X, y = load_images_and_labels(training_set)
+    elif model_type == 'LBH':
+        feature = SpatialHistogram()
+        classifier = NearestNeighbor(dist_metric=EuclideanDistance(), k=1)
+        model = PredictableModel(feature=feature, classifier=classifier)
+        X, y = load_images_and_labels(training_set)
+    else:
+        e = Exception("Unsupported model type")
+        raise e
+        exit()
+
+    print 'begin model computation'
+    model.compute(X, y)
+    print 'model computation complete'
+    return model
 
 def test_model(training_set, model):
     """
