@@ -17,15 +17,15 @@ def load_images_and_labels(training_set):
 	y = []
 	for source_image in training_set:
 		X.append(np.array(source_image.image))
-		y.append(source_image.metadata.person.label)	
+		y.append(source_image.metadata.person.label)
 	return (X, y)
-	
+
 
 def create_predictive_model(training_set, model_type='PCA'):
     """
     Create a predictive model for facial recognition
     training_set -- the images and data that will be used to create the model
-    
+
     Returns a predictive model object
     """
     if model_type == 'PCA':
@@ -54,7 +54,7 @@ def create_predictive_model(training_set, model_type='PCA'):
     print 'model computation complete'
     return model
 
-def test_model(training_set, model):
+def test_model(training_set, model, threshold=None):
     """
     Test performance of a model against a training set
     Randomly Selects 10% of training set as the test set
@@ -73,7 +73,7 @@ def test_model(training_set, model):
         train_indices = [index for index in train_indices if index not in test_indices]
         #print 'train indices: %s' % train_indices
         #print 'test indices: %s' % test_indices
-        cross_validator.validate(X, y, train_indices, test_indices)
+        cross_validator.validate(X, y, train_indices, test_indices, threshold=threshold)
         sum_precision += cross_validator.validation_results[0].precision()
         cross_validator.print_results()
     sum_precision = sum_precision/ test_run_count

@@ -6,6 +6,7 @@ from image import load_images, rotate_images, crop_images, normalize_images, wri
 from predict import create_predictive_model, test_model
 
 DEFAULT_MODEL = 'PCA'
+DEFAULT_THRESHOLD = 200
 
 def show_usage():
 	print 'Please enter the path of the directory containing the source images and metadata'
@@ -118,7 +119,7 @@ def run_analysis(directory_path, model_type='PCA'):
 
 	model = create_predictive_model(training_set, model_type=model_type)
 
-	test_model(training_set, model)
+	test_model(training_set, model, threshold=DEFAULT_THRESHOLD)
 
 
 if __name__ == '__main__':
